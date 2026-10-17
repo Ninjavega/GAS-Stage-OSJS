@@ -8,6 +8,7 @@ try {
 const {spawn} = require('child_process');
 const path = require('path');
 const os = require('os');
+const fs = require('fs');
 
 const MAX_SESSIONS = 4;
 const MAX_MESSAGE_BYTES = 64 * 1024;
@@ -68,32 +69,45 @@ class TerminalServiceProvider extends ServiceProvider {
 
     const config = this.core.configuration;
     const shell = process.env.SHELL || '/bin/bash';
-    const env = {
-      PATH: process.env.PATH || '/usr/local/bin:/usr/bin:/bin',
-      HOME: process.env.HOME || os.homedir(),
-      USER: process.env.USER || (os.userInfo ? os.userInfo().username : 'user'),
-      LOGNAME: process.env.LOGNAME || process.env.USER || (os.userInfo ? os.userInfo().username : 'user'),
-      SHELL: shell,
-      LANG: process.env.LANG || 'C.UTF-8',
-      TERM: 'xterm-256color'
-    };
+    const rootDir = path.resolve(config.root);
+    const vfsDir = path.resolve(rootDir, 'vfs/demo');
+    const startCwd = fs.existsSync(vfsDir) ? vfsDir : rootDir;
+    const bridgeScript = path.resolve(__dirname, '../pty_bridge.py');
 
     let processHandle;
-    let isPty = false;
+    let isPtyBridge = false;
+
     try {
-      if (pty && typeof pty.spawn === 'function') {
-        processHandle = pty.spawn(shell, ['-l'], {
-          name: 'xterm-256color',
-          cols: 80,
-          rows: 24,
-          cwd: path.resolve(config.root),
-          env
+      if (fs.existsSync(bridgeScript)) {
+        processHandle = spawn('python3', [
+          bridgeScript,
+          '80',
+          '24',
+          startCwd,
+          shell
+        ], {
+          cwd: startCwd,
+          env: {
+            ...process.env,
+            TERM: 'xterm-256color',
+            COLORTERM: 'truecolor',
+            HOME: startCwd,
+            USER: (req.session && req.session.user && req.session.user.username) || 'demo',
+            OSJS_ROOT: rootDir,
+            OSJS_VFS: vfsDir,
+            PATH: `${path.resolve(rootDir, 'bin')}:${process.env.PATH || '/usr/local/bin:/usr/bin:/bin'}`
+          }
         });
-        isPty = true;
+        isPtyBridge = true;
       } else {
         processHandle = spawn(shell, ['-i'], {
-          cwd: path.resolve(config.root),
-          env,
+          cwd: startCwd,
+          env: {
+            ...process.env,
+            TERM: 'xterm-256color',
+            HOME: startCwd,
+            PATH: `${path.resolve(rootDir, 'bin')}:${process.env.PATH || '/usr/local/bin:/usr/bin:/bin'}`
+          },
           stdio: ['pipe', 'pipe', 'pipe']
         });
       }
@@ -110,7 +124,10 @@ class TerminalServiceProvider extends ServiceProvider {
         closed = true;
         this.sessions.delete(session);
         try {
-          processHandle.kill();
+          if (isPtyBridge && processHandle.stdin && !processHandle.stdin.destroyed) {
+            processHandle.stdin.write(JSON.stringify({type: 'close'}) + '\n');
+          }
+          processHandle.kill('SIGTERM');
         } catch (error) {
           this.core.logger.warn(error);
         }
@@ -124,13 +141,31 @@ class TerminalServiceProvider extends ServiceProvider {
     };
 
     this.sessions.add(session);
-    send({type: 'ready', cwd: path.resolve(config.root)});
+    send({type: 'ready', cwd: startCwd});
 
-    if (isPty) {
-      processHandle.onData(data => send({type: 'output', data}));
-      processHandle.onExit(({exitCode, signal}) => {
+    if (isPtyBridge) {
+      let stdoutBuffer = '';
+      processHandle.stdout.on('data', chunk => {
+        stdoutBuffer += chunk.toString();
+        while (stdoutBuffer.includes('\n')) {
+          const lineIdx = stdoutBuffer.indexOf('\n');
+          const line = stdoutBuffer.slice(0, lineIdx).trim();
+          stdoutBuffer = stdoutBuffer.slice(lineIdx + 1);
+          if (!line) continue;
+          try {
+            const packet = JSON.parse(line);
+            send(packet);
+          } catch (e) {
+            send({type: 'output', data: line + '\r\n'});
+          }
+        }
+      });
+      processHandle.stderr.on('data', data => {
+        send({type: 'output', data: data.toString()});
+      });
+      processHandle.on('close', (exitCode, signal) => {
         if (!closed) {
-          send({type: 'exit', exitCode, signal});
+          send({type: 'exit', exitCode: exitCode || 0, signal});
           closed = true;
           this.sessions.delete(session);
           if (ws.readyState === 1) ws.close(1000, 'Shell exited');
@@ -172,21 +207,19 @@ class TerminalServiceProvider extends ServiceProvider {
         return;
       }
 
-      if (packet.type === 'input' && typeof packet.data === 'string') {
-        if (isPty) {
-          processHandle.write(packet.data);
-        } else if (processHandle.stdin && !processHandle.stdin.destroyed) {
-          processHandle.stdin.write(packet.data);
+      if (isPtyBridge) {
+        if (processHandle.stdin && !processHandle.stdin.destroyed) {
+          processHandle.stdin.write(JSON.stringify(packet) + '\n');
         }
-      } else if (packet.type === 'resize') {
-        if (isPty && typeof processHandle.resize === 'function') {
-          const cols = Math.max(20, Math.min(MAX_COLUMNS, Math.floor(Number(packet.cols) || 80)));
-          const rows = Math.max(8, Math.min(MAX_ROWS, Math.floor(Number(packet.rows) || 24)));
-          processHandle.resize(cols, rows);
+      } else {
+        if (packet.type === 'input' && typeof packet.data === 'string') {
+          if (processHandle.stdin && !processHandle.stdin.destroyed) {
+            processHandle.stdin.write(packet.data);
+          }
+        } else if (packet.type === 'close') {
+          session.close();
+          ws.close(1000, 'Terminal closed');
         }
-      } else if (packet.type === 'close') {
-        session.close();
-        ws.close(1000, 'Terminal closed');
       }
     });
 

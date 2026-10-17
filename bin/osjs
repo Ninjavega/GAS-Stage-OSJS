@@ -1,0 +1,111 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const path = require('path');
+
+const root = path.resolve(__dirname, '..');
+const vfsDemoDir = path.resolve(root, 'vfs/demo');
+const distDir = path.resolve(root, 'dist');
+const metadataPath = path.resolve(distDir, 'metadata.json');
+
+const args = process.argv.slice(2);
+const command = args[0] || 'help';
+
+function printHeader() {
+  console.log('\x1b[1;36m' + '=========================================' + '\x1b[0m');
+  console.log('\x1b[1;32m' + '  OS.js Cloud Desktop CLI & Kernel Tool  ' + '\x1b[0m');
+  console.log('\x1b[1;36m' + '=========================================' + '\x1b[0m');
+}
+
+switch (command) {
+  case 'help':
+    printHeader();
+    console.log(`
+Usage: osjs <command> [arguments]
+
+Available Commands:
+  osjs status          View OS.js desktop status & VFS mountpoints
+  osjs apps            List all installed & discoverable applications
+  osjs vfs             Inspect OS.js virtual filesystem directory
+  osjs create <file>   Create a new file in home: (OS.js File Manager)
+  osjs help            Show this help reference
+
+Filesystem Integration:
+  - Your home:/ directory maps directly to:
+    ${vfsDemoDir}
+  - Any file you touch, edit, or create here immediately shows up
+    in the OS.js File Manager and Textpad application!
+`);
+    break;
+
+  case 'status':
+  case 'info':
+    printHeader();
+    console.log(`
+\x1b[1mPlatform:\x1b[0m OS.js v3.1.12
+\x1b[1mEnvironment:\x1b[0m Node.js ${process.version} / Linux POSIX PTY
+\x1b[1mRoot Directory:\x1b[0m ${root}
+
+\x1b[1;33mVFS Mountpoints:\x1b[0m
+  • \x1b[32mhome:/\x1b[0m -> ${vfsDemoDir} (Active user space)
+  • \x1b[32mosjs:/\x1b[0m -> ${distDir} (System distribution)
+
+\x1b[1;33mTerminal Kernels Available:\x1b[0m
+  1. \x1b[32mHost Shell (POSIX PTY)\x1b[0m: Native Linux bash shell with direct VFS disk I/O
+  2. \x1b[32mWebVM Kernel (CheerpX WASM)\x1b[0m: Virtualized client-side Linux execution
+`);
+    break;
+
+  case 'apps':
+    printHeader();
+    if (fs.existsSync(metadataPath)) {
+      try {
+        const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+        console.log('\n\x1b[1;33mInstalled Applications:\x1b[0m');
+        metadata.forEach((app, idx) => {
+          const title = (app.title && (app.title.en_EN || app.title)) || app.name;
+          const cat = app.category || 'general';
+          console.log(`  ${idx + 1}. \x1b[1;32m${app.name}\x1b[0m - ${title} (\x1b[34m${cat}\x1b[0m)`);
+        });
+      } catch (e) {
+        console.error('Error reading metadata.json:', e.message);
+      }
+    } else {
+      console.log('metadata.json not found in dist. Run "npm run build" to discover packages.');
+    }
+    break;
+
+  case 'vfs':
+    printHeader();
+    console.log(`\n\x1b[1;33mFiles in OS.js home:/ (${vfsDemoDir}):\x1b[0m`);
+    if (fs.existsSync(vfsDemoDir)) {
+      const files = fs.readdirSync(vfsDemoDir);
+      if (files.length === 0) {
+        console.log('  (Empty directory. Create files using `echo "hello" > vfs/demo/hello.txt`)');
+      } else {
+        files.forEach(f => {
+          const full = path.join(vfsDemoDir, f);
+          const stat = fs.statSync(full);
+          const type = stat.isDirectory() ? '\x1b[1;34m[DIR]\x1b[0m ' : '\x1b[32m[FILE]\x1b[0m';
+          console.log(`  ${type} ${f} (${stat.size} bytes)`);
+        });
+      }
+    }
+    break;
+
+  case 'create':
+    const filename = args[1];
+    if (!filename) {
+      console.log('Usage: osjs create <filename> [content]');
+      process.exit(1);
+    }
+    const targetFile = path.resolve(vfsDemoDir, filename);
+    const content = args.slice(2).join(' ') || `Created via OS.js Terminal CLI at ${new Date().toISOString()}\n`;
+    fs.writeFileSync(targetFile, content);
+    console.log(`\x1b[1;32m✓ Created:\x1b[0m ${filename} in home:/`);
+    console.log(`Open OS.js File Manager or Textpad to view it!`);
+    break;
+
+  default:
+    console.log(`Unknown command: ${command}. Run "osjs help" for guidance.`);
+}

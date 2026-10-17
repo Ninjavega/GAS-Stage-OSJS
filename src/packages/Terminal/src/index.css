@@ -7,10 +7,11 @@
   color: #d7e4e7;
   background: #090d11;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  position: relative;
 }
 
 .osjs-terminal__toolbar {
-  min-height: 54px;
+  min-height: 56px;
   padding: 0 16px;
   display: flex;
   align-items: center;
@@ -31,13 +32,48 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .osjs-terminal__identity strong {
   color: #eef8fa;
   font-size: 13px;
   font-weight: 650;
+}
+
+.osjs-kernel-switcher {
+  display: inline-flex;
+  background: #0b1318;
+  border: 1px solid #253942;
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.osjs-kernel-btn {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #8da4ac;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.osjs-kernel-btn:hover {
+  color: #d8edf1;
+  background: #182830;
+}
+
+.osjs-kernel-btn--active {
+  color: #4ee0ee !important;
+  background: #1b333e !important;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
 .osjs-terminal__mark {
@@ -65,6 +101,9 @@
   border-radius: 4px;
   font-size: 11px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s;
 }
 
 .osjs-terminal__actions button:hover {
@@ -101,6 +140,15 @@
   background: #ff727a;
 }
 
+.osjs-terminal__workspace {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
 .osjs-terminal__screen {
   min-height: 0;
   flex: 1;
@@ -111,4 +159,92 @@
 
 .osjs-terminal__screen .xterm {
   height: 100%;
+}
+
+.osjs-webvm-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #0d151c;
+}
+
+.osjs-webvm-banner {
+  height: 38px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #111e27;
+  border-bottom: 1px solid #233742;
+}
+
+.osjs-webvm-action-btn {
+  padding: 3px 8px;
+  font-size: 10px;
+  background: #192d38;
+  color: #a2c4cc;
+  border: 1px solid #324c5a;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.osjs-webvm-action-btn:hover {
+  background: #234252;
+  color: #e4f7fa;
+}
+
+.osjs-webvm-iframe {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #000;
+}
+
+/* Modals */
+.osjs-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 8, 12, 0.75);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.osjs-modal {
+  width: min(540px, 94%);
+  max-height: 85%;
+  background: #141f27;
+  border: 1px solid #2a414e;
+  border-radius: 8px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.osjs-modal__header {
+  padding: 12px 16px;
+  background: #17242e;
+  border-bottom: 1px solid #263a45;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.osjs-modal__body {
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.osjs-modal__footer {
+  padding: 10px 16px;
+  background: #121c23;
+  border-top: 1px solid #23353f;
+  display: flex;
+  justify-content: flex-end;
 }
