@@ -1,0 +1,6 @@
+{
+  "name": "OS.js Cloud Desktop",
+  "description": "OS.js web desktop environment with Tactical Map and Terminal applications.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

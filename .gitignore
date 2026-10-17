@@ -1,0 +1,12 @@
+.swp
+.tern-*
+node_modules/
+build/
+dist/
+packages.json
+sessions/
+session-store.db
+.DS_Store
+*.log
+.env*
+!.env.example

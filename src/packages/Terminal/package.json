@@ -1,0 +1,15 @@
+{
+  "name": "osjs-terminal",
+  "version": "1.0.0",
+  "description": "Interactive shell terminal for OS.js",
+  "main": "dist/main.js",
+  "style": "dist/main.css",
+  "files": [
+    "dist/",
+    "metadata.json",
+    "public/icon.svg"
+  ],
+  "osjs": {
+    "type": "package"
+  }
+}

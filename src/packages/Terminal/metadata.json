@@ -1,0 +1,15 @@
+{
+  "name": "Terminal",
+  "category": "utilities",
+  "icon": "icon.svg",
+  "title": {
+    "en_EN": "Terminal"
+  },
+  "description": {
+    "en_EN": "Interactive shell terminal"
+  },
+  "files": [
+    "main.js",
+    "main.css"
+  ]
+}

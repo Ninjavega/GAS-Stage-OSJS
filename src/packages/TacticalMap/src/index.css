@@ -1,0 +1,78 @@
+@import "tailwindcss";
+@import "maplibre-gl/dist/maplibre-gl.css";
+
+/* MapLibre map root */
+.maplibregl-map {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+  user-select: none !important;
+}
+
+/* MapLibre canvas container MUST receive all pointer events for panning, dragging, and zooming */
+.maplibregl-canvas-container {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  pointer-events: auto !important;
+}
+
+.maplibregl-canvas-container.maplibregl-interactive {
+  cursor: grab !important;
+  pointer-events: auto !important;
+}
+
+.maplibregl-canvas-container.maplibregl-interactive:active {
+  cursor: grabbing !important;
+}
+
+.maplibregl-canvas {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Control container & Deck.gl overlay MUST pass through pointer events to the MapLibre canvas beneath */
+.maplibregl-control-container,
+.maplibregl-ctrl-top-right,
+.maplibregl-ctrl-top-left,
+.maplibregl-ctrl-bottom-right,
+.maplibregl-ctrl-bottom-left,
+.maplibregl-ctrl,
+.deck-canvas,
+canvas[id^="deckgl-overlay"] {
+  pointer-events: none !important;
+}
+
+/* Ensure Deck.gl overlay sits above MapLibre canvas visually with transparent background */
+.maplibregl-control-container {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 2 !important;
+}
+
+.maplibregl-control-container canvas {
+  background: transparent !important;
+  background-color: transparent !important;
+  pointer-events: none !important;
+}
+
+/* MapLibre specific interactive controls (like buttons, popups) */
+.maplibregl-ctrl-group,
+.maplibregl-ctrl-group button,
+.maplibregl-popup,
+.maplibregl-popup * {
+  pointer-events: auto !important;
+}

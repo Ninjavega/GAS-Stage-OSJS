@@ -1,0 +1,114 @@
+.osjs-terminal {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #d7e4e7;
+  background: #090d11;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+.osjs-terminal__toolbar {
+  min-height: 54px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #121b22;
+  border-bottom: 1px solid #26363f;
+}
+
+.osjs-terminal__identity,
+.osjs-terminal__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.osjs-terminal__identity > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.osjs-terminal__identity strong {
+  color: #eef8fa;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.osjs-terminal__mark {
+  color: #55dce7;
+  font-family: ui-monospace, monospace;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.osjs-terminal__cwd {
+  max-width: min(50vw, 520px);
+  overflow: hidden;
+  color: #7f979f;
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.osjs-terminal__actions button {
+  padding: 6px 10px;
+  color: #cae4e8;
+  background: #1a2a32;
+  border: 1px solid #334952;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.osjs-terminal__actions button:hover {
+  background: #203944;
+  border-color: #387886;
+}
+
+.osjs-terminal__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #8ba0a6;
+  font-size: 10px;
+  text-transform: capitalize;
+}
+
+.osjs-terminal__status > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #87969a;
+}
+
+.osjs-terminal__status--connected > span {
+  background: #55dca0;
+  box-shadow: 0 0 8px #55dca080;
+}
+
+.osjs-terminal__status--connecting > span {
+  background: #f1c76c;
+}
+
+.osjs-terminal__status--disconnected > span {
+  background: #ff727a;
+}
+
+.osjs-terminal__screen {
+  min-height: 0;
+  flex: 1;
+  padding: 12px 14px;
+  overflow: hidden;
+  background: #090d11;
+}
+
+.osjs-terminal__screen .xterm {
+  height: 100%;
+}

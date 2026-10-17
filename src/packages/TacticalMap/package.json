@@ -1,0 +1,14 @@
+{
+  "name": "osjs-tactical-map",
+  "version": "1.0.0",
+  "description": "Tactical Map geospatial and GeoJSON viewer for OS.js",
+  "main": "dist/main.js",
+  "style": "dist/main.css",
+  "files": [
+    "dist/",
+    "metadata.json"
+  ],
+  "osjs": {
+    "type": "package"
+  }
+}

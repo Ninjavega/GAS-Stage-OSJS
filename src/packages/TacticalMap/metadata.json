@@ -1,0 +1,16 @@
+{
+  "name": "TacticalMap",
+  "category": "utilities",
+  "icon": "icon.png",
+  "title": {
+    "en_EN": "Tactical Map",
+    "nb_NO": "Taktisk Kart"
+  },
+  "description": {
+    "en_EN": "Real-time global tactical geospatial monitor, OpenFreeMap vector basemap and GeoJSON layer visualization"
+  },
+  "files": [
+    "main.js",
+    "main.css"
+  ]
+}
